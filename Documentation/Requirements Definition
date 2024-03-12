@@ -1,0 +1,18 @@
+Select and confirm menu items
+ - Display food items with image, price, and item name
+ - Allow user to add food item to cart
+ - Allow user to customize food items as they add them to their cart
+ - Allow user to see total number of items in cart
+ - Allow user to navigate to the final page
+Enter delivery details for the order
+ - Allow user to choose method of delivery: Pickup or Delivery
+ - Allow user to input delivery address if needed
+ - Allow user to choose the delivery time of their order
+Complete a payment transaction
+ - Allow the user to input their payment details
+ - Ensure data is kept secure
+ - Allow user to choose if they will pay now or at the counter
+Store all order details for review
+ - Allow user to review their cart
+ - Allow user to review payment details and delivery address
+ - Allow user to add and remove items from cart
