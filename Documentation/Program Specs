@@ -1,26 +1,3 @@
-Select and confirm menu items
- - Display food items with image, price, and item name
- - Allow user to add food item to cart
- - Allow user to customize food items as they add them to their cart
- - Allow user to see total number of items in cart
- - Allow user to navigate to the final page
-
-Enter delivery details for the order
- - Allow user to choose method of delivery: Pickup or Delivery
- - Allow user to input delivery address if needed
- - Allow user to choose the delivery time of their order
-
-Complete a payment transaction
- - Allow the user to input their payment details
- - Ensure data is kept secure
- - Allow user to choose if they will pay now or at the counter
-
-Store all order details for review
- - Allow user to review their cart
- - Allow user to review payment details and delivery address
- - Allow user to add and remove items from cart
-
-
 Menu Items
  - SQLite3 database containing item details
     - Item name
@@ -36,6 +13,40 @@ Menu Items
  - Cart can be an array of "MenuItem" objects
 
 GUI
+ - Menu items page
+    - Grid of menu items
+    - Scroll through menu items
+    - Add to cart button in bottom right of menu item
+    - Display image of food item
+    - Display name in image
+    - Display price next to item name
+    - Cart button in bottom right of page
+        - Sticks in bottom right corner - doesnt move as you scroll
+        - displays total number of items in cart
+    - Clicking on the add to cart button for an item will display another window
+ - Add to Cart
+    - Displays item information
+        - Price
+        - Image
+        - Name
+        - Description
+    - Displays customisations
+        - EG drink flavours, ice cream flavours
+        - Ingredient additions/subtractions
+        - Add/Subtract button next to customisation or checkboxes or radio buttons, depending on customisation
+ - Payment and address input page
+    - Basic text input form
+        - Payment info first
+        - Address
+        - Delivery information
+            - Delivery or Pickup
+            - Custom delivery/pickup time
+ - Cart page
+    - Displays all items in cart
+    - Add/Subtract button next to item in order to change number of said item in cart
+    - Displays total cost of cart
+    - Displays user's address
+    - Display's sanitised version of users payment
 
 Sensitive Information
  - Ensure no information is saved to the disk
