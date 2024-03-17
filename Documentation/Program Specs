@@ -16,13 +16,13 @@ GUI
  - Menu items page
     - Grid of menu items
     - Scroll through menu items
-    - Add to cart button in bottom right of menu item
+    - Add to cart button in top right of menu item
     - Display image of food item
     - Display name in image
     - Display price next to item name
     - Cart button in bottom right of page
         - Sticks in bottom right corner - doesnt move as you scroll
-        - displays total number of items in cart
+        - Displays total number of items in cart
     - Clicking on the add to cart button for an item will display another window
  - Add to Cart
     - Displays item information
