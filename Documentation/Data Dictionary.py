@@ -23,7 +23,7 @@ ItemName = Variable("ItemName",
                     "Is Text. Is Title Case")
 
 ItemPrice = Variable("ItemPrice",
-                     "float",
+                     "Float",
                      "$3132.31",
                      "8",
                      "8",
@@ -49,14 +49,14 @@ ItemIngredients = Variable("ItemIngredients",
                            "['Tomato', 'Cheese', 'Hamburger Patty']",
                            "N/A")
 
-ItemImage = Variable("ItemImage",
-                     "String",
-                     "N/A",
-                     "50",
-                     "N/A",
-                     "A string containing a path to the image for display",
-                     "/images/burger.jpg",
-                     "Is a path. File exists")
+ItemNumber = Variable("ItemNumber",
+                      "Integer",
+                      "N/A",
+                      "1",
+                      "N/A",
+                      "A integer containing the item number.",
+                      "0001",
+                      "Is a number.")
 
 ItemFlavours = Variable("ItemFlavours",
                         "Array",
@@ -95,7 +95,7 @@ LastName = Variable("LastName",
                     "Is Text. Is Title Case")
 
 CardNumber = Variable("CardNumber",
-                      "Int",
+                      "Integer",
                       "1111 2222 3333 4444",
                       "16",
                       "16",
@@ -104,10 +104,10 @@ CardNumber = Variable("CardNumber",
                       "Is int. Is 16 characters long")
 
 CardSecurityCode = Variable("CardSecurityCode",
-                            "Int",
+                            "Integer",
                             "111",
-                            "3",
-                            "3",
+                            "1",
+                            "1",
                             "An integer containing the card security code for the user",
                             "123",
                             "Is 3 characters, Is int")
@@ -149,7 +149,7 @@ AddressStreet = Variable("AddressStreet",
                          "Is string")
 
 AddressPostCode = Variable("AddressPostCode",
-                           "Int",
+                           "Integer",
                            "2291",
                            "4",
                            "4",
@@ -203,10 +203,13 @@ DeliveryTime = Variable("DeliveryTime",
                         "Is a valid 24 hr time")
 
 Variables = [DeliveryTime, DeliveryOption, AddressCity, AddressState, AddressSuburb, AddressStreet, AddressNumber,
-             AddressPostCode, ItemImage, ItemSauces, ItemFlavours, ItemIngredients, ItemName, ItemPrice,
+             AddressPostCode, ItemNumber, ItemSauces, ItemFlavours, ItemIngredients, ItemName, ItemPrice,
              ItemDescription, Menu, CardNumber, CardExpiry, CardSecurityCode, FirstName, LastName, LastName]
 
-columnLabels = ['Name', 'Variable Type', 'Display Format', 'Size in Bytes', 'Size for Display', 'Description', 'Example', 'Validation']
-data = [[i.name, i.variabletype, i.displayformat, i.sizeinbyte, i.sizefordisplay, i.description, i.example, i.validation] for i in Variables]
+columnLabels = ['Name', 'Variable Type', 'Display Format', 'Size in Bytes', 'Size for Display', 'Description',
+                'Example', 'Validation']
+data = [
+    [i.name, i.variabletype, i.displayformat, i.sizeinbyte, i.sizefordisplay, i.description, i.example, i.validation]
+    for i in Variables]
 
 print(tabulate.tabulate(data, headers=columnLabels, tablefmt="github"))
