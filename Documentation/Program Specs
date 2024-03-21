@@ -11,6 +11,7 @@ Menu Items
     - Sauces
  - "MenuItem" class
  - Cart can be an array of "MenuItem" objects
+ - Resize main window with variable number of columns displayed
 
 GUI
  - Menu items page
