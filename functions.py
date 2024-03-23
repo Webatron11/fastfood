@@ -6,8 +6,30 @@ from PIL import ImageTk, Image
 from sqlite3 import connect
 
 
-def addItemToCart():
-    print("test")
+def addItemToCart(root: ttk.Window(), item: MenuItem):
+    addtocart = ttk.Frame(master=root, width=700, height=700)
+
+    itemimage = ImageTk.PhotoImage(Image.open(fp=f'images/%s.png' % item.number))
+    imagelabel = ttk.Label(master=addtocart, image=itemimage)
+    imagelabel.grid(column=0, row=0)
+    imagelabel.image = itemimage
+
+    namelabel = ttk.Label(master=addtocart, text=item.name)
+    namelabel.grid(column=0, row=1, padx=5, pady=5)
+
+    pricelabel = ttk.Label(master=addtocart, text=item.price)
+    pricelabel.grid(column=0, row=2, padx=5, pady=5)
+
+    descriptionlabel = ttk.Label(master=addtocart, text=item.description)
+    descriptionlabel.grid(column=0, row=3, padx=5, pady=5)
+
+    quantity = ttk.Frame(master=addtocart)
+
+    addbutton = ttk.Button(master=quantity)
+
+    subtractbutton = ttk.Button(master=quantity)
+
+    numberofitemsentry = ttk.Entry(master=quantity)
 
 
 def initMenu(db: str, tableName: str):
@@ -91,7 +113,7 @@ def drawCart(root: ttk.Window()):
     # Cart icon
     image = ImageTk.PhotoImage(Image.open('images/cart_icon.png'))
     # Creating cart canvas with number in top right. Make it clickable
-    cart = ttk.Label(master=cartFrame, image=image, style='NoBG.TLabel')
+    cart = ttk.Label(master=cartFrame, image=image)
     cart.image = image
 
     cart = ttk.Canvas()
