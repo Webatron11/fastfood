@@ -1,18 +1,27 @@
-from functions import initMenu, drawCart, drawItems
+from classes import Items, CartButton, Menu, Cart
 import ttkbootstrap as ttk
 
 # Set up the window with its size, minimum size and max size.
 # 225x225 images, then a random constant because it works.
 
-windowSize = [(225 * 3) + 131, (225 * 3) + 125]
+windowSize = [(225 * 3) + 131, (225 * 3) + 350]
 root = ttk.Window(size=windowSize,
                   minsize=windowSize,
                   maxsize=windowSize,
                   title='Fast Food Ordering Thing',
                   themename='cyborg')
 
-menu = initMenu('menuitems.db', 'menu')
-drawItems(root, menu)
-drawCart(root)
+menu = Menu(db='menuitems.db', table='menu')
+cart = Cart()
+
+items = Items(master=root, menu=menu, height=(225 * 3) + 131, width=(225 * 3) + 125, cart=cart)
+items.grid(column=0, row=0)
+
+cartFrame = CartButton(master=root)
+cartFrame.grid(column=0, row=1, sticky='se', padx=20, pady=5)
 
 root.mainloop()
+
+# TODO Add cart page
+# TODO Add credit card input page
+# TODO Add delivery info page
