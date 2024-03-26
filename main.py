@@ -9,7 +9,7 @@ root = ttk.Window(size=windowSize,
                   minsize=windowSize,
                   maxsize=windowSize,
                   title='Fast Food Ordering Thing',
-                  themename='cyborg')
+                  themename='litera')
 
 menu = Menu(db='menuitems.db', table='menu')
 cart = Cart()
