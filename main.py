@@ -22,6 +22,9 @@ cartFrame.grid(column=0, row=1, sticky='se', padx=20, pady=5)
 
 root.mainloop()
 
+for i in cart:
+    print(i.name, cart[i])
+
 # TODO Add cart page
 # TODO Add credit card input page
 # TODO Add delivery info page
