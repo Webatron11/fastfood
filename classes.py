@@ -3,6 +3,7 @@ from ttkbootstrap.scrolled import ScrolledFrame
 from PIL import ImageTk, Image
 from sqlite3 import connect
 import tkinter as tk
+from collections import namedtuple
 
 
 class MenuItem:
@@ -65,17 +66,24 @@ class Menu(list):
             self.append(item)
 
 
-class Cart(dict):
+class Cart(list):
     def __init__(self):
         super().__init__()
 
     def edit(self, item: MenuItem, quantity: int, ingredients: list, flavours: list, sauces: list):
-        self.update({item: [quantity, ingredients, flavours, sauces]})
+        self.append([item, quantity, ingredients, flavours, sauces])
 
 
-class PaymentInfo(tuple):
+class PaymentInfo(namedtuple):
+    def __new__(cls, cardnum: int, expirydate: str, csv: int):
+        return super().__init__(cardnum, expirydate, csv, field_names=('Card Number', 'Expiry Date', 'CSV'))
+
     def __init__(self, cardnum: int, expirydate: str, csv: int):
-        super().__init__(cardnum, expirydate, csv)
+        self.__new__(cls=type(self), cardnum=cardnum, expirydate=expirydate, csv=csv)
+
+
+class DeliveryInfo(namedtuple):
+    def __new__(cls, ):
 
 
 class Items(ScrolledFrame):
@@ -101,7 +109,7 @@ class Items(ScrolledFrame):
 
             # Create a button widget. Add the item name and the price, as well as the image from above. Compound
             # places the image above the text.
-            itemButton = ttk.Button(master=self, text=(item.name + " $" + str(item.price)), image=image,
+            itemButton = ttk.Button(master=self, text=(item.name + f'$%.2f' % item.price), image=image,
                                     command=addToCart, compound='top')
 
             # Weird workaround for images not displaying correctly.
@@ -154,7 +162,7 @@ class AddToCartPopup(ttk.Frame):
         flavours.configure(text='Flavours')
         flavours.grid(column=0, row=6, padx=20, pady=5, columnspan=2)
 
-        quantity = QuantitySpinBox(master=self)
+        quantity = QuantitySpinBox(master=self, height=20)
         quantity.grid(column=0, row=7, padx=20, pady=20, columnspan=2)
 
         # TODO make it so that if there isn't a flavour, sauce or ingredients array it doesnt freak the fuck out.
@@ -247,13 +255,16 @@ class OptionBox(ttk.Labelframe):
 class CartButton(ttk.Frame):
     def __init__(self,
                  *args,
+                 cart: Cart,
+                 delivery: DeliveryInfo,
+                 payment: PaymentInfo,
                  **kwargs):
         super().__init__(*args, **kwargs)
 
         # Cart icon
         image = ImageTk.PhotoImage(Image.open('images/cart_new.png').resize((200, 200)))
-        # Creating cart canvas with number in top right. Make it clickable
-        self.cartButton = ttk.Button(master=self, image=image, command=self.goToCart)
+
+        self.cartButton = ttk.Button(master=self, image=image, command=lambda: self.goToCart(cart=cart, payment=payment, delivery=delivery))
         self.cartButton.image = image
 
         cartNumber = ttk.Label(master=self, text='0', background='#be1a1a', font='Helvetica 18',
@@ -263,8 +274,10 @@ class CartButton(ttk.Frame):
 
         self.cartButton.grid(column=0, row=0, sticky='ne')
 
-    def goToCart(self):
-        pass
+    @staticmethod
+    def goToCart(cart: Cart, payment: PaymentInfo, delivery: DeliveryInfo):
+        cartPage = ViewCartPage(cart=cart, payment=payment, delivery=delivery)
+        cartPage.grid(row=0, column=0, sticky='nsew')
 
     def updateButton(self, cart: Cart):
         number = len(cart)
@@ -272,8 +285,72 @@ class CartButton(ttk.Frame):
 
 
 class ViewCartPage(ttk.Frame):
-    def __init__(self, *args, cart: Cart, **kwargs):
+    def __init__(self, *args, cart: Cart, payment: PaymentInfo, delivery: DeliveryInfo, **kwargs):
         super().__init__(*args, **kwargs)
+
+        items = ScrolledFrame(master=self)
+        row = 0
+        for item in cart:
+            itemFrame = ttk.Frame(master=items)
+
+            try:
+                image = ImageTk.PhotoImage(Image.open(f'images/%s.png' % item[0].number).resize((50, 50)))
+            except FileNotFoundError:
+                image = ImageTk.PhotoImage(Image.open('images/na.png').resize((50, 50)))
+
+            itemImage = ttk.Label(master=itemFrame, image=image, text=f'%s $%.2f' % (item[0].name, item[0].price),
+                                  compound='left')
+            itemImage.grid(row=0, column=0, padx=5, pady=10)
+
+            itemImage.image = image
+
+            itemIngredients = ttk.Label(master=itemFrame, text=item[2])
+            itemIngredients.grid(column=1, row=0, padx=5, pady=10)
+
+            itemFlavours = ttk.Label(master=itemFrame, text=item[3])
+            itemFlavours.grid(column=2, row=0, padx=5, pady=10)
+
+            itemSauces = ttk.Label(master=itemFrame, text=item[4])
+            itemSauces.grid(column=3, row=0, padx=5, pady=10)
+
+            itemQuantity = QuantitySpinBox(master=itemFrame, initial=item[1],
+                                           command=lambda: self.UpdateCart(cart, item[0], itemQuantity.get()),
+                                           width=40)
+            itemQuantity.grid(column=4, row=0, padx=5, pady=10)
+
+            itemFrame.grid(column=0, row=row, columnspan=2, padx=5, pady=10)
+            row += 1
+
+        items.grid(column=0, row=0, padx=5, pady=5)
+
+        paymentFrame = ttk.Frame(master=self, borderwidth=5)
+
+        numberLabel = ttk.Label(master=paymentFrame, text=payment[0])
+        numberLabel.grid(column=0, row=0, padx=5, pady=5)
+
+        csvLabel = ttk.Label(master=paymentFrame, text=payment[2])
+        csvLabel.grid(column=0, row=1, padx=5, pady=5)
+
+        expiryLabel = ttk.Label(master=paymentFrame, text=payment[1])
+        expiryLabel.grid(column=0, row=2, padx=5, pady=5)
+
+        paymentFrame.grid(column=0, row=1, padx=5, pady=5)
+
+        deliveryFrame = ttk.Frame(master=self, borderwidth=5)
+
+        deliveryFrame.grid(column=0, row=1, padx=5, pady=5)
+
+        closeButton = ttk.Button(master=self, text='Close', command=self.closePopup)
+        closeButton.grid(column=1, row=2, padx=5)
+
+    def closePopup(self):
+        self.grid_forget()
+
+    @staticmethod
+    def UpdateCart(cart: Cart, item: MenuItem, quantity: int):
+        for i in range(len(cart)):
+            if cart[i][0] == item:
+                cart[i][1] = quantity
 
 
 class QuantitySpinBox(ttk.Frame):
@@ -282,6 +359,7 @@ class QuantitySpinBox(ttk.Frame):
                  width: int = 100,
                  height: int = 32,
                  step_size: int = 1,
+                 initial: int = 1,
                  command=None,
                  **kwargs):
         super().__init__(*args, width=width, height=height, **kwargs)
@@ -292,16 +370,16 @@ class QuantitySpinBox(ttk.Frame):
         self.grid_columnconfigure((0, 2), weight=0)
         self.grid_columnconfigure(1, weight=1)
 
-        self.subButton = ttk.Button(self, text='-', width=height - 6, command=self.subButtonCallback)
+        self.subButton = ttk.Button(self, text='-', width=15, command=self.subButtonCallback)
         self.subButton.grid(row=0, column=2, padx=(3, 0), pady=3)
 
-        self.addButton = ttk.Button(self, text='+', width=height - 6, command=self.addButtonCallback)
+        self.addButton = ttk.Button(self, text='+', width=15, command=self.addButtonCallback)
         self.addButton.grid(row=0, column=0, padx=(0, 3), pady=3)
 
-        self.entry = ttk.Entry(self, width=width - (2 * height))
+        self.entry = ttk.Entry(self, width=25)
         self.entry.grid(row=0, column=1, padx=3, pady=3, sticky='ew')
 
-        self.entry.insert(0, '1')
+        self.entry.insert(0, str(initial))
 
     def addButtonCallback(self):
         if self.command is not None:

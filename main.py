@@ -1,4 +1,4 @@
-from classes import Items, CartButton, Menu, Cart
+from classes import Items, CartButton, Menu, Cart, PaymentInfo, DeliveryInfo
 import ttkbootstrap as ttk
 
 # Set up the window with its size, minimum size and max size.
@@ -13,17 +13,19 @@ root = ttk.Window(size=windowSize,
 
 menu = Menu(db='menuitems.db', table='menu')
 cart = Cart()
+payment = PaymentInfo(0, '', 0)
+delivery = DeliveryInfo()
 
 items = Items(master=root, menu=menu, height=(225 * 3) + 131, width=(225 * 3) + 125, cart=cart)
 items.grid(column=0, row=0)
 
-cartFrame = CartButton(master=root)
+cartFrame = CartButton(master=root, cart=cart, delivery=delivery, payment=payment)
 cartFrame.grid(column=0, row=1, sticky='se', padx=20, pady=5)
 
 root.mainloop()
 
 for i in cart:
-    print(i.name, cart[i])
+    print(i[0].name, i[1], i[2], i[3], i[4])
 
 # TODO Add cart page
 # TODO Add credit card input page
