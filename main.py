@@ -13,8 +13,9 @@ root = ttk.Window(size=windowSize,
 
 menu = Menu(db='menuitems.db', table='menu')
 cart = Cart()
-payment = PaymentInfo(0, '', 0)
-delivery = DeliveryInfo("", "", "", "", "", 0, "", bool())
+payment = PaymentInfo(1111222233334444, '01/24', 123)
+delivery = DeliveryInfo(number="10a", street="Ashford Pde", suburb="Merwether Heights", city="Newcastle", state="NSW",
+                        postcode=2291, time='12:00', method=True)
 
 items = Items(master=root, menu=menu, height=(225 * 3) + 131, width=(225 * 3) + 125, cart=cart)
 items.grid(column=0, row=0)
