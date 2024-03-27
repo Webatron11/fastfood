@@ -83,7 +83,29 @@ class PaymentInfo(namedtuple):
 
 
 class DeliveryInfo(namedtuple):
-    def __new__(cls, ):
+    def __new__(cls,
+                city: str,
+                state: str,
+                suburb: str,
+                street: str,
+                number: str,
+                postcode: int,
+                time: str,
+                method: bool):
+        return super().init(city, state, suburb, street, number, postcode, time, method,
+                            field_names=('City', 'State', 'Suburb', 'Street', 'Number', 'Postcode', 'Time', 'Method'))
+
+    def __init__(self,
+                 city: str,
+                 state: str,
+                 suburb: str,
+                 street: str,
+                 number: str,
+                 postcode: int,
+                 time: str,
+                 method: bool):
+        self.__new__(cls=type(self), city=city, state=state, suburb=suburb, street=street, number=number,
+                     postcode=postcode, time=time, method=method)
 
 
 class Items(ScrolledFrame):
@@ -264,7 +286,8 @@ class CartButton(ttk.Frame):
         # Cart icon
         image = ImageTk.PhotoImage(Image.open('images/cart_new.png').resize((200, 200)))
 
-        self.cartButton = ttk.Button(master=self, image=image, command=lambda: self.goToCart(cart=cart, payment=payment, delivery=delivery))
+        self.cartButton = ttk.Button(master=self, image=image,
+                                     command=lambda: self.goToCart(cart=cart, payment=payment, delivery=delivery))
         self.cartButton.image = image
 
         cartNumber = ttk.Label(master=self, text='0', background='#be1a1a', font='Helvetica 18',
@@ -338,6 +361,7 @@ class ViewCartPage(ttk.Frame):
 
         deliveryFrame = ttk.Frame(master=self, borderwidth=5)
 
+        addressLabel = ttk.Label(master=deliveryFrame, text='')
         deliveryFrame.grid(column=0, row=1, padx=5, pady=5)
 
         closeButton = ttk.Button(master=self, text='Close', command=self.closePopup)

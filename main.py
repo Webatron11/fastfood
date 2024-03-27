@@ -14,7 +14,7 @@ root = ttk.Window(size=windowSize,
 menu = Menu(db='menuitems.db', table='menu')
 cart = Cart()
 payment = PaymentInfo(0, '', 0)
-delivery = DeliveryInfo()
+delivery = DeliveryInfo("", "", "", "", "", 0, "", bool())
 
 items = Items(master=root, menu=menu, height=(225 * 3) + 131, width=(225 * 3) + 125, cart=cart)
 items.grid(column=0, row=0)
