@@ -77,6 +77,9 @@ class PaymentInfo(dict):
     def __init__(self, cardnum: int, expirydate: str, csv: int):
         super().__init__({'Card Num': cardnum, 'Expiry Date': expirydate, 'CSV': csv})
 
+    def change(self, cardnum: int, expirydate: str, csv: int):
+        self.update({'Card Num': cardnum, 'Expiry Date': expirydate, 'CSV': csv})
+
 
 class DeliveryInfo(dict):
     def __init__(self,
@@ -148,9 +151,9 @@ class AddToCartPopup(ttk.Frame):
         self.grid_propagate(False)
 
         try:
-            itemImage = ttk.PhotoImage(file=f'images/%s.png' % item.number)
+            itemImage = ImageTk.PhotoImage(Image.open(fp=f'images/%s.png' % item.number))
         except FileNotFoundError:
-            itemImage = ttk.PhotoImage(file='images/na.png')
+            itemImage = ImageTk.PhotoImage(Image.open(fp='images/na.png'))
 
         imageLabel = ttk.Label(master=self, image=itemImage)
         imageLabel.grid(column=0, row=0, columnspan=2, pady=20)
@@ -393,6 +396,9 @@ class ViewCartPage(ttk.Frame):
         closeButton = ttk.Button(master=self, text='Close', command=self.closePopup)
         closeButton.grid(column=1, row=2, padx=10, pady=10)
 
+        orderButton = ttk.Button(master=self, text="Place Order", command=self.placeOrder)
+        orderButton.grid(column=0, row=2, padx=10, pady=10)
+
     @staticmethod
     def changeDelivery(self, master: ttk.Window, delivery: DeliveryInfo):
         popup = UpdateDeliveryPopup(master=master, delivery=delivery, frame=self.deliveryFrame)
@@ -411,6 +417,9 @@ class ViewCartPage(ttk.Frame):
         for i in range(len(cart)):
             if cart[i][0] == item:
                 cart[i][1] = quantity
+
+    def placeOrder(self):
+        pass
 
 
 class UpdatePaymentPopup(ttk.Frame):
@@ -444,14 +453,18 @@ class UpdatePaymentPopup(ttk.Frame):
         closeButton = ttk.Button(master=self, text='Close', command=self.closePopup)
         closeButton.grid(column=1, row=8, padx=10, pady=5)
 
-        finishButton = ttk.Button(master=self, text='Update', command=self.updatePayment)
+        finishButton = ttk.Button(master=self, text='Submit', command=self.updatePayment)
         finishButton.grid(column=0, row=8, padx=10, pady=5)
 
     def closePopup(self):
         self.grid_forget()
 
-    def updatePayment(self):
-        pass
+    def updatePayment(self, payment: PaymentInfo, frame: ttk.Frame):
+        payment.change(cardnum=int(self.numberEntry.get()), expirydate=self.expiryEntry.get(),
+                       csv=int(self.csvEntry.get()))
+        self.closePopup()
+        frame.grid_forget()
+        frame.grid(column=0, row=1, padx=10, pady=5, sticky='NSEW')
 
 
 class UpdateDeliveryPopup(ttk.Frame):
@@ -528,7 +541,8 @@ class UpdateDeliveryPopup(ttk.Frame):
         closeButton = ttk.Button(master=self, text='Close', command=self.closePopup)
         closeButton.grid(column=1, row=8, padx=10, pady=5)
 
-        updateButton = ttk.Button(master=self, text='Update', command=lambda: self.updateDelivery(delivery=delivery, frame=frame))
+        updateButton = ttk.Button(master=self, text='Submit',
+                                  command=lambda: self.updateDelivery(delivery=delivery, frame=frame))
         updateButton.grid(column=0, row=8, padx=10, pady=5)
 
     def closePopup(self):
