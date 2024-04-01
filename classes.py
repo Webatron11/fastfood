@@ -3,7 +3,6 @@ from ttkbootstrap.scrolled import ScrolledFrame
 from PIL import ImageTk, Image
 from sqlite3 import connect
 import tkinter as tk
-from typing import NamedTuple
 
 
 class MenuItem:
@@ -74,21 +73,30 @@ class Cart(list):
         self.append([item, quantity, ingredients, flavours, sauces])
 
 
-class PaymentInfo(NamedTuple):
-    cardnum: int
-    expirydate: str
-    csv: int
+class PaymentInfo(dict):
+    def __init__(self, cardnum: int, expirydate: str, csv: int):
+        super().__init__({'Card Num': cardnum, 'Expiry Date': expirydate, 'CSV': csv})
 
 
-class DeliveryInfo(NamedTuple):
-    city: str
-    state: str
-    suburb: str
-    street: str
-    number: str
-    postcode: int
-    time: str
-    method: bool
+class DeliveryInfo(dict):
+    def __init__(self,
+                 city: str,
+                 state: str,
+                 suburb: str,
+                 street: str,
+                 number: str,
+                 postcode: int,
+                 time: str,
+                 method: bool):
+        super().__init__(
+            {'City': city, 'State': state, 'Suburb': suburb, 'Street': street, 'Number': number, 'Postcode': postcode,
+             'Time': time, 'Method': method})
+
+    def change(self, city: str, state: str, suburb: str, street: str, number: str, postcode: int, time: str,
+               method: bool):
+        self.update(
+            {'City': city, 'State': state, 'Suburb': suburb, 'Street': street, 'Number': number, 'Postcode': postcode,
+             'Time': time, 'Method': method})
 
 
 class Items(ScrolledFrame):
@@ -110,11 +118,11 @@ class Items(ScrolledFrame):
             except FileNotFoundError:  # If the image does not exist, open an N/A image instead.
                 image = ImageTk.PhotoImage(Image.open('images/na.png'))
 
-            addToCart = AddToCartPopup(master=master, width=500, height=700, item=item, cart=cart)
+            addToCart = AddToCartPopup(master=master, width=550, height=700, item=item, cart=cart)
 
             # Create a button widget. Add the item name and the price, as well as the image from above. Compound
             # places the image above the text.
-            itemButton = ttk.Button(master=self, text=(item.name + f'$%.2f' % item.price), image=image,
+            itemButton = ttk.Button(master=self, text=(item.name + f' $%.2f' % item.price), image=image,
                                     command=addToCart, compound='top')
 
             # Weird workaround for images not displaying correctly.
@@ -140,9 +148,9 @@ class AddToCartPopup(ttk.Frame):
         self.grid_propagate(False)
 
         try:
-            itemImage = ImageTk.PhotoImage(Image.open(fp=f'images/%s.png' % item.number))
+            itemImage = ttk.PhotoImage(file=f'images/%s.png' % item.number)
         except FileNotFoundError:
-            itemImage = ImageTk.PhotoImage(Image.open(fp='images/na.png'))
+            itemImage = ttk.PhotoImage(file='images/na.png')
 
         imageLabel = ttk.Label(master=self, image=itemImage)
         imageLabel.grid(column=0, row=0, columnspan=2, pady=20)
@@ -222,7 +230,7 @@ class OptionBox(ttk.Labelframe):
 
             ttk.Label(self, text='N/A').grid(column=0, row=0)
         else:
-            self.configure(height=35+((len(options)-1)*25))
+            self.configure(height=35 + ((len(options) - 1) * 25))
             row = 0
             for option in options:
                 if inputType == 'checkbox':
@@ -232,13 +240,13 @@ class OptionBox(ttk.Labelframe):
                                              text=option,
                                              variable=optionvar,
                                              onvalue=option)
+                    button.grid(column=0, row=row, sticky='w', padx=5, pady=1)
                 elif inputType == 'radio':
                     button = ttk.Radiobutton(master=self,
                                              text=option, value=option,
                                              variable=checkboxvar,
                                              command=lambda: self.chosenoptions.append(checkboxvar.get()))
-
-                button.grid(column=0, row=row, sticky='w', padx=5, pady=1)
+                    button.grid(column=0, row=row, sticky='w', padx=5, pady=1)
                 row = row + 1
 
             try:
@@ -300,7 +308,7 @@ class ViewCartPage(ttk.Frame):
                  delivery: DeliveryInfo, **kwargs):
         super().__init__(*args, height=height, width=width, master=master, relief='ridge', **kwargs)
 
-        items = ScrolledFrame(master=self, height=height - 300, width=width)
+        items = ScrolledFrame(master=self, height=height - 300, width=width, relief='ridge')
         row = 0
         for item in cart:
             itemFrame = ttk.Frame(master=items)
@@ -340,51 +348,60 @@ class ViewCartPage(ttk.Frame):
         numberlabelLabel = ttk.Label(master=paymentFrame, text='Card Number:')
         numberlabelLabel.grid(column=0, row=0, padx=10, pady=5, sticky='e')
 
-        numberLabel = ttk.Label(master=paymentFrame, text=payment[0])
+        numberLabel = ttk.Label(master=paymentFrame, text=payment['Card Num'])
         numberLabel.grid(column=1, row=0, padx=10, pady=5, sticky='w')
 
         csvlabelLabel = ttk.Label(master=paymentFrame, text='Card CSV:')
         csvlabelLabel.grid(column=0, row=1, padx=10, pady=5, sticky='e')
 
-        csvLabel = ttk.Label(master=paymentFrame, text=payment[2])
+        csvLabel = ttk.Label(master=paymentFrame, text=payment['CSV'])
         csvLabel.grid(column=1, row=1, padx=10, pady=5, sticky='w')
 
         expirylabelLabel = ttk.Label(master=paymentFrame, text="Card Expiry:")
         expirylabelLabel.grid(column=0, row=2, padx=10, pady=5, sticky='e')
 
-        expiryLabel = ttk.Label(master=paymentFrame, text=payment[1])
+        expiryLabel = ttk.Label(master=paymentFrame, text=payment['Expiry Date'])
         expiryLabel.grid(column=1, row=2, padx=10, pady=5, sticky='w')
 
-        changeButton = ttk.Button(master=paymentFrame, text='Change Payment Details', command=self.changePayment)
+        changeButton = ttk.Button(master=paymentFrame, text='Change Payment Details',
+                                  command=lambda: self.changePayment(master=master, payment=payment))
         changeButton.grid(column=0, row=3, padx=5, pady=5, sticky='W', columnspan=2)
 
         paymentFrame.grid(column=0, row=1, padx=10, pady=5, sticky='NSEW')
 
-        deliveryFrame = ttk.Frame(master=self, relief='ridge')
+        self.deliveryFrame = ttk.Frame(master=self, relief='ridge')
 
-        address1 = ttk.Label(master=deliveryFrame,
-                             text=' '.join([str(delivery.number), delivery.street, delivery.suburb]))
+        address1 = ttk.Label(master=self.deliveryFrame,
+                             text=' '.join([str(delivery['Number']), delivery["Street"], delivery['Suburb']]))
         address1.grid(column=0, row=0, padx=5, pady=5, sticky='W')
 
-        address2 = ttk.Label(master=deliveryFrame, text=' '.join([delivery.city, str(delivery.postcode), delivery.state]))
+        address2 = ttk.Label(master=self.deliveryFrame,
+                             text=' '.join([delivery['City'], str(delivery['Postcode']), delivery['State']]))
         address2.grid(column=0, row=1, padx=5, pady=5, sticky='W')
 
-        methodLabel = ttk.Label(master=deliveryFrame, text='Method: %s  When: %s' % ('Delivery' if delivery.method else 'Pickup', delivery.time))
+        methodLabel = ttk.Label(master=self.deliveryFrame, text='Method: %s  When: %s' %
+                                                                ('Delivery' if delivery['Method'] else 'Pickup',
+                                                                 delivery['Time']))
         methodLabel.grid(column=0, row=2, padx=5, pady=5, sticky='W')
 
-        changeButton = ttk.Button(master=deliveryFrame, text='Change Delivery Details', command=self.changeDelivery)
+        changeButton = ttk.Button(master=self.deliveryFrame, text='Change Delivery Details',
+                                  command=lambda: self.changeDelivery(self=self, master=master, delivery=delivery))
         changeButton.grid(column=0, row=3, padx=5, pady=5, sticky='W')
 
-        deliveryFrame.grid(column=1, row=1, padx=10, pady=5, sticky='NSEW')
+        self.deliveryFrame.grid(column=1, row=1, padx=10, pady=5, sticky='NSEW')
 
         closeButton = ttk.Button(master=self, text='Close', command=self.closePopup)
         closeButton.grid(column=1, row=2, padx=10, pady=10)
 
-    def changeDelivery(self):
-        pass
+    @staticmethod
+    def changeDelivery(self, master: ttk.Window, delivery: DeliveryInfo):
+        popup = UpdateDeliveryPopup(master=master, delivery=delivery, frame=self.deliveryFrame)
+        popup.grid(column=0, row=0)
 
-    def changePayment(self):
-        pass
+    @staticmethod
+    def changePayment(master: ttk.Window, payment: PaymentInfo):
+        popup = UpdatePaymentPopup(master=master, payment=payment)
+        popup.grid(column=0, row=0)
 
     def closePopup(self):
         self.grid_forget()
@@ -394,6 +411,146 @@ class ViewCartPage(ttk.Frame):
         for i in range(len(cart)):
             if cart[i][0] == item:
                 cart[i][1] = quantity
+
+
+class UpdatePaymentPopup(ttk.Frame):
+    def __init__(self, *args, master: ttk.Window, payment: PaymentInfo, **kwargs):
+        super().__init__(*args, master=master, **kwargs)
+
+        numberLabel = ttk.Label(master=self, text='Card Number:')
+        numberLabel.grid(column=0, row=0, padx=10, pady=5, sticky='e')
+
+        self.numberEntry = ttk.Entry(master=self)
+        self.numberEntry.delete(0)
+        self.numberEntry.insert(0, str(payment['Card Num']))
+        self.numberEntry.grid(column=1, row=0, padx=10, pady=5, sticky='w')
+
+        csvLabel = ttk.Label(master=self, text='Card CSV:')
+        csvLabel.grid(column=0, row=1, padx=10, pady=5, sticky='e')
+
+        self.csvEntry = ttk.Entry(master=self)
+        self.csvEntry.delete(0)
+        self.csvEntry.insert(0, str(payment['CSV']))
+        self.csvEntry.grid(column=1, row=1, padx=10, pady=5, sticky='w')
+
+        expiryLabel = ttk.Label(master=self, text="Card Expiry:")
+        expiryLabel.grid(column=0, row=2, padx=10, pady=5, sticky='e')
+
+        self.expiryEntry = ttk.Entry(master=self)
+        self.expiryEntry.delete(0)
+        self.expiryEntry.insert(0, payment['Expiry Date'])
+        self.expiryEntry.grid(column=1, row=2, padx=10, pady=5, sticky='w')
+
+        closeButton = ttk.Button(master=self, text='Close', command=self.closePopup)
+        closeButton.grid(column=1, row=8, padx=10, pady=5)
+
+        finishButton = ttk.Button(master=self, text='Update', command=self.updatePayment)
+        finishButton.grid(column=0, row=8, padx=10, pady=5)
+
+    def closePopup(self):
+        self.grid_forget()
+
+    def updatePayment(self):
+        pass
+
+
+class UpdateDeliveryPopup(ttk.Frame):
+    def __init__(self, *args, master: ttk.Window, delivery: DeliveryInfo, frame: ttk.Frame, **kwargs):
+        super().__init__(*args, master=master, **kwargs)
+
+        numberLabel = ttk.Label(master=self, text='Number:')
+        numberLabel.grid(column=0, row=0, sticky='e')
+
+        self.numberEntry = ttk.Entry(master=self)
+        self.numberEntry.delete(0)
+        self.numberEntry.insert(0, delivery['Number'])
+        self.numberEntry.grid(column=1, row=0, padx=10, pady=5, sticky='w')
+
+        streetLabel = ttk.Label(master=self, text="Street Name")
+        streetLabel.grid(column=0, row=1, sticky='e')
+
+        self.streetEntry = ttk.Entry(master=self)
+        self.streetEntry.delete(0)
+        self.streetEntry.insert(0, delivery['Street'])
+        self.streetEntry.grid(column=1, row=1, padx=10, pady=5, sticky='w')
+
+        suburbLabel = ttk.Label(master=self, text='Suburb')
+        suburbLabel.grid(column=0, row=2, sticky='e')
+
+        self.suburbEntry = ttk.Entry(master=self)
+        self.suburbEntry.delete(0)
+        self.suburbEntry.insert(0, delivery['Suburb'])
+        self.suburbEntry.grid(column=1, row=2, padx=10, pady=5, sticky='w')
+
+        cityLabel = ttk.Label(master=self, text='City')
+        cityLabel.grid(column=0, row=3, sticky='e')
+
+        self.cityEntry = ttk.Entry(master=self)
+        self.cityEntry.delete(0)
+        self.cityEntry.insert(0, delivery['City'])
+        self.cityEntry.grid(column=1, row=3, padx=10, pady=5, sticky='w')
+
+        stateLabel = ttk.Label(master=self, text='State')
+        stateLabel.grid(column=0, row=4, sticky='e')
+
+        # Make dropdown box
+        states = ['NSW', 'ACT', 'SA', 'VIC', 'QLD', 'WA', 'TAS', 'NT']
+        self.state = ttk.StringVar()
+        stateEntry = ttk.Combobox(master=self, values=states, textvariable=self.state)
+        stateEntry.set(delivery['State'])
+        stateEntry.grid(column=1, row=4, padx=10, pady=5, sticky='w')
+
+        postcodeLabel = ttk.Label(master=self, text='Postcode')
+        postcodeLabel.grid(column=0, row=5, sticky='e')
+
+        self.postcodeEntry = ttk.Entry(master=self)
+        self.postcodeEntry.delete(0)
+        self.postcodeEntry.insert(0, str(delivery['Postcode']))
+        self.postcodeEntry.grid(column=1, row=5, padx=10, pady=5, sticky='w')
+
+        methodLabel = ttk.Label(master=self, text='Method: ')
+        methodLabel.grid(column=0, row=6, sticky='e')
+
+        # Make dropdown menu.
+        self.method = ttk.StringVar()
+        methodEntry = ttk.Combobox(master=self, values=['Pickup', 'Delivery'], textvariable=self.method)
+        methodEntry.set('Delivery' if delivery['Method'] else 'Pickup')
+        methodEntry.grid(column=1, row=6, padx=10, pady=5, sticky='w')
+
+        timeLabel = ttk.Label(master=self, text='Time of pickup/delivery')
+        timeLabel.grid(column=0, row=7, sticky='e')
+
+        self.timeEntry = ttk.Entry(master=self)
+        self.timeEntry.delete(0)
+        self.timeEntry.insert(0, delivery['Time'])
+        self.timeEntry.grid(column=1, row=7, padx=10, pady=5, sticky='w')
+
+        closeButton = ttk.Button(master=self, text='Close', command=self.closePopup)
+        closeButton.grid(column=1, row=8, padx=10, pady=5)
+
+        updateButton = ttk.Button(master=self, text='Update', command=lambda: self.updateDelivery(delivery=delivery, frame=frame))
+        updateButton.grid(column=0, row=8, padx=10, pady=5)
+
+    def closePopup(self):
+        self.grid_forget()
+
+    def updateDelivery(self, delivery: DeliveryInfo, frame: ttk.Frame()):
+        method = bool()
+        if self.method == 'Delivery':
+            method = True
+        elif self.method == 'Pickup':
+            method = False
+        delivery.change(city=self.cityEntry.get(),
+                        postcode=int(self.postcodeEntry.get()),
+                        time=self.timeEntry.get(),
+                        suburb=self.suburbEntry.get(),
+                        number=self.numberEntry.get(),
+                        street=self.streetEntry.get(),
+                        state=self.state.get(),
+                        method=method)
+        self.closePopup()
+        frame.grid_forget()
+        frame.grid(column=1, row=1, padx=10, pady=5, sticky='NSEW')
 
 
 class QuantitySpinBox(ttk.Frame):
@@ -413,13 +570,13 @@ class QuantitySpinBox(ttk.Frame):
         self.grid_columnconfigure((0, 2), weight=0)
         self.grid_columnconfigure(1, weight=1)
 
-        self.subButton = ttk.Button(self, text='-', width=round(width/3), command=self.subButtonCallback)
+        self.subButton = ttk.Button(self, text='-', width=round(width / 3), command=self.subButtonCallback)
         self.subButton.grid(row=0, column=2, padx=(3, 0), pady=3)
 
-        self.addButton = ttk.Button(self, text='+', width=round(width/3), command=self.addButtonCallback)
+        self.addButton = ttk.Button(self, text='+', width=round(width / 3), command=self.addButtonCallback)
         self.addButton.grid(row=0, column=0, padx=(0, 3), pady=3)
 
-        self.entry = ttk.Entry(self, width=round(width/3))
+        self.entry = ttk.Entry(self, width=round(width / 3))
         self.entry.grid(row=0, column=1, padx=3, pady=3, sticky='ew')
 
         self.entry.insert(0, str(initial))
