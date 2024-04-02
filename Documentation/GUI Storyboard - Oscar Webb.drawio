@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2024-03-17T22:41:39.576Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" etag="fnrg0vN9FiGqui0UOz9J" version="24.0.7" type="device">
+<mxfile host="app.diagrams.net" modified="2024-04-02T02:41:07.924Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" etag="MsbYWDfsRe5XHR4ihxrG" version="24.2.1" type="device">
   <diagram name="Page-1" id="bdCuxribR_A03B12ISou">
     <mxGraphModel dx="1414" dy="745" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -290,9 +290,9 @@
           <mxGeometry x="20" y="870" width="240.01" height="240.01" as="geometry" />
         </mxCell>
         <mxCell id="ikJFBv8js-pOLj2k_Jm1-353" value="Address Information" style="whiteSpace=wrap;html=1;rounded=0;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;spacing=-20;" parent="1" vertex="1">
-          <mxGeometry x="410" y="870" width="250" height="350" as="geometry" />
+          <mxGeometry x="410" y="870" width="250" height="400" as="geometry" />
         </mxCell>
-        <mxCell id="ikJFBv8js-pOLj2k_Jm1-355" value="" style="whiteSpace=wrap;html=1;aspect=fixed;rounded=0;" parent="1" vertex="1">
+        <mxCell id="ikJFBv8js-pOLj2k_Jm1-355" value="&lt;div style=&quot;background-color:#1e1e2e;color:#cdd6f4&quot;&gt;&lt;pre style=&quot;font-family:&#39;JetBrains Mono&#39;,monospace;font-size:9.8pt;&quot;&gt;&lt;span style=&quot;color:#a6e3a1;&quot;&gt;Your order has been placed! &lt;/span&gt;&lt;/pre&gt;&lt;pre style=&quot;font-family:&#39;JetBrains Mono&#39;,monospace;font-size:9.8pt;&quot;&gt;&lt;span style=&quot;color:#a6e3a1;&quot;&gt;It will show up in approximately 90 minutes.&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="414" y="480.005" width="360" height="360" as="geometry" />
         </mxCell>
         <mxCell id="ikJFBv8js-pOLj2k_Jm1-361" value="Card Number" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -573,6 +573,15 @@
         </mxCell>
         <mxCell id="ikJFBv8js-pOLj2k_Jm1-215" value="" style="html=1;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;shadow=0;dashed=0;strokeWidth=2;shape=mxgraph.ios7.misc.scroll_(vertical);fillColor=#a0a0a0;aspect=fixed;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="765" y="80.23499999999996" width="4" height="53.29" as="geometry" />
+        </mxCell>
+        <mxCell id="J-3kndk8J7WDGfwJZv19-1" value="Submit" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="1220" width="85" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="J-3kndk8J7WDGfwJZv19-2" value="Reset" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="565" y="1220" width="85" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="J-3kndk8J7WDGfwJZv19-3" value="Close" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="686" width="120" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

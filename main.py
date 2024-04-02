@@ -1,3 +1,5 @@
+# Oscar Webb
+
 from classes import Items, CartButton, Menu, Cart, PaymentInfo, DeliveryInfo
 import ttkbootstrap as ttk
 
@@ -28,6 +30,5 @@ root.mainloop()
 for i in cart:
     print(i[0].name, i[1], i[2], i[3], i[4])
 
-# TODO Add cart page
-# TODO Add credit card input page
-# TODO Add delivery info page
+# TODO Fix cart quantity
+# TODO Add tooltips

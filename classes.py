@@ -1,8 +1,12 @@
+# Oscar Webb
+
+import tabulate
 import ttkbootstrap as ttk
 from ttkbootstrap.scrolled import ScrolledFrame
 from PIL import ImageTk, Image
 from sqlite3 import connect
 import tkinter as tk
+from ttkbootstrap.validation import add_numeric_validation
 
 
 class MenuItem:
@@ -66,8 +70,9 @@ class Menu(list):
 
 
 class Cart(list):
-    def __init__(self):
+    def __init__(self, total: float = 0):
         super().__init__()
+        self.total = total
 
     def edit(self, item: MenuItem, quantity: int, ingredients: list, flavours: list, sauces: list):
         self.append([item, quantity, ingredients, flavours, sauces])
@@ -311,6 +316,9 @@ class ViewCartPage(ttk.Frame):
                  delivery: DeliveryInfo, **kwargs):
         super().__init__(*args, height=height, width=width, master=master, relief='ridge', **kwargs)
 
+        self.master = master
+        self.cart = cart
+
         items = ScrolledFrame(master=self, height=height - 300, width=width, relief='ridge')
         row = 0
         for item in cart:
@@ -337,7 +345,8 @@ class ViewCartPage(ttk.Frame):
             itemSauces.grid(column=3, row=0, padx=5, pady=10)
 
             itemQuantity = QuantitySpinBox(master=itemFrame, initial=item[1],
-                                           command=lambda: self.UpdateCart(cart, item[0], itemQuantity.get()),
+                                           command=lambda: self.UpdateCart(self=self, cart=cart, item=item[0],
+                                                                           quantity=itemQuantity.get()),
                                            width=10)
             itemQuantity.grid(column=4, row=0, padx=5, pady=10, sticky='E')
 
@@ -388,7 +397,7 @@ class ViewCartPage(ttk.Frame):
         methodLabel.grid(column=0, row=2, padx=5, pady=5, sticky='W')
 
         changeButton = ttk.Button(master=self.deliveryFrame, text='Change Delivery Details',
-                                  command=lambda: self.changeDelivery(self=self, master=master, delivery=delivery))
+                                  command=lambda: self.changeDelivery(master=master, delivery=delivery))
         changeButton.grid(column=0, row=3, padx=5, pady=5, sticky='W')
 
         self.deliveryFrame.grid(column=1, row=1, padx=10, pady=5, sticky='NSEW')
@@ -397,11 +406,14 @@ class ViewCartPage(ttk.Frame):
         closeButton.grid(column=1, row=2, padx=10, pady=10)
 
         orderButton = ttk.Button(master=self, text="Place Order", command=self.placeOrder)
-        orderButton.grid(column=0, row=2, padx=10, pady=10)
+        orderButton.grid(column=0, row=2, padx=10, pady=10, sticky='E')
+
+        self.carttotalLabel = ttk.Label(master=self, text='Total: $%.2f' % cart.total)
+        self.carttotalLabel.grid(column=0, row=2, padx=10, pady=10, sticky='W')
 
     @staticmethod
-    def changeDelivery(self, master: ttk.Window, delivery: DeliveryInfo):
-        popup = UpdateDeliveryPopup(master=master, delivery=delivery, frame=self.deliveryFrame)
+    def changeDelivery(master: ttk.Window, delivery: DeliveryInfo):
+        popup = UpdateDeliveryPopup(master=master, delivery=delivery)
         popup.grid(column=0, row=0)
 
     @staticmethod
@@ -413,18 +425,25 @@ class ViewCartPage(ttk.Frame):
         self.grid_forget()
 
     @staticmethod
-    def UpdateCart(cart: Cart, item: MenuItem, quantity: int):
+    def UpdateCart(self, cart: Cart, item: MenuItem, quantity: int):
         for i in range(len(cart)):
             if cart[i][0] == item:
                 cart[i][1] = quantity
 
+        total = 0
+        for i in cart:
+            total += (i[1] * i[0].price)
+
+        cart.total = total
+        self.carttotalLabel.config(text='Total: $%.2f' % cart.total)
+
     def placeOrder(self):
-        pass
+        HOORAY(master=self.master, cart=self.cart).grid(row=0, column=0, sticky='NSEW')
 
 
 class UpdatePaymentPopup(ttk.Frame):
     def __init__(self, *args, master: ttk.Window, payment: PaymentInfo, **kwargs):
-        super().__init__(*args, master=master, **kwargs)
+        super().__init__(*args, master=master, relief='ridge', **kwargs)
 
         numberLabel = ttk.Label(master=self, text='Card Number:')
         numberLabel.grid(column=0, row=0, padx=10, pady=5, sticky='e')
@@ -453,23 +472,21 @@ class UpdatePaymentPopup(ttk.Frame):
         closeButton = ttk.Button(master=self, text='Close', command=self.closePopup)
         closeButton.grid(column=1, row=8, padx=10, pady=5)
 
-        finishButton = ttk.Button(master=self, text='Submit', command=self.updatePayment)
+        finishButton = ttk.Button(master=self, text='Submit', command=lambda: self.updatePayment(payment=payment))
         finishButton.grid(column=0, row=8, padx=10, pady=5)
 
     def closePopup(self):
         self.grid_forget()
 
-    def updatePayment(self, payment: PaymentInfo, frame: ttk.Frame):
+    def updatePayment(self, payment: PaymentInfo):
         payment.change(cardnum=int(self.numberEntry.get()), expirydate=self.expiryEntry.get(),
                        csv=int(self.csvEntry.get()))
         self.closePopup()
-        frame.grid_forget()
-        frame.grid(column=0, row=1, padx=10, pady=5, sticky='NSEW')
 
 
 class UpdateDeliveryPopup(ttk.Frame):
-    def __init__(self, *args, master: ttk.Window, delivery: DeliveryInfo, frame: ttk.Frame, **kwargs):
-        super().__init__(*args, master=master, **kwargs)
+    def __init__(self, *args, master: ttk.Window, delivery: DeliveryInfo, **kwargs):
+        super().__init__(*args, master=master, relief='ridge', **kwargs)
 
         numberLabel = ttk.Label(master=self, text='Number:')
         numberLabel.grid(column=0, row=0, sticky='e')
@@ -542,13 +559,13 @@ class UpdateDeliveryPopup(ttk.Frame):
         closeButton.grid(column=1, row=8, padx=10, pady=5)
 
         updateButton = ttk.Button(master=self, text='Submit',
-                                  command=lambda: self.updateDelivery(delivery=delivery, frame=frame))
+                                  command=lambda: self.updateDelivery(delivery=delivery))
         updateButton.grid(column=0, row=8, padx=10, pady=5)
 
     def closePopup(self):
         self.grid_forget()
 
-    def updateDelivery(self, delivery: DeliveryInfo, frame: ttk.Frame()):
+    def updateDelivery(self, delivery: DeliveryInfo):
         method = bool()
         if self.method == 'Delivery':
             method = True
@@ -563,8 +580,22 @@ class UpdateDeliveryPopup(ttk.Frame):
                         state=self.state.get(),
                         method=method)
         self.closePopup()
-        frame.grid_forget()
-        frame.grid(column=1, row=1, padx=10, pady=5, sticky='NSEW')
+
+
+class HOORAY(ttk.Frame):
+    def __init__(self, *args, master: ttk.Window, cart: Cart, **kwargs):
+        super().__init__(*args, master=master, **kwargs)
+        label = ttk.Label(self, text='Your order has been placed! \n It will show up in approximately 90 minutes.',
+                          font='Helvetica 25 bold')
+        label.grid(column=0, row=0, sticky='NSEW', padx=10, pady=10)
+        print(tabulate.tabulate(headers=['Item Name', 'Quantity', 'Ingredients', 'Sauces', 'Flavours'],
+                                tabular_data=cart))
+        button = ttk.Button(self, text='Close', command=self.close)
+        button.grid()
+
+    @staticmethod
+    def close():
+        exit()
 
 
 class QuantitySpinBox(ttk.Frame):
@@ -593,7 +624,20 @@ class QuantitySpinBox(ttk.Frame):
         self.entry = ttk.Entry(self, width=round(width / 3))
         self.entry.grid(row=0, column=1, padx=3, pady=3, sticky='ew')
 
-        self.entry.insert(0, str(initial))
+        # add_validation(self.entry, self.validation, 'all')
+        add_numeric_validation(self.entry)
+
+        self.entry.insert(index=0, string=str(initial))
+
+    @staticmethod
+    def validation(ValidationEvent):
+        if ValidationEvent is int:
+            if ValidationEvent > 0 & ValidationEvent <= 50:
+                return True
+            else:
+                return False
+        else:
+            return False
 
     def addButtonCallback(self):
         if self.command is not None:
